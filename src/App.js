@@ -22,7 +22,7 @@ const COLORS = [
 const SENT_COLORS = { POSITIVO: "#5af0c8", NEGATIVO: "#f05a5a", NEUTRO: "#888", MIXTO: "#f0c85a" };
 const SENT_OPTS = ["POSITIVO", "NEGATIVO", "NEUTRO", "MIXTO"];
 const BATCH_SIZE = 80;
-const GEMINI_MODEL = "gemini-1.5-flash";
+const GEMINI_MODEL = "gemini-2.0-flash";
 
 // ─── Gemini API helper ────────────────────────────────────────────────────────
 async function callGemini(apiKey, prompt) {
