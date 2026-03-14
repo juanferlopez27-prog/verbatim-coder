@@ -25,7 +25,43 @@ const BATCH_SIZE = 30;
 const GEMINI_MODEL = "gemini-2.0-flash";
 
 // ─── Gemini API helper ────────────────────────────────────────────────────────
-async function callGemini(apiKey, prompt) {
+async function callGemini(apiKey, prompt, retries = 3) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+  for (let attempt = 0; attempt < retries; attempt++) {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.1,
+          maxOutputTokens: 8192,
+          responseMimeType: "application/json",
+        },
+      }),
+    });
+    if (res.status === 429) {
+      if (attempt < retries - 1) {
+        await new Promise(r => setTimeout(r, 65000));
+        continue;
+      } else {
+        throw new Error("Límite de requests alcanzado después de varios intentos. Intenta con menos respuestas.");
+      }
+    }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      const msg = err?.error?.message || `Error ${res.status}`;
+      if (res.status === 400) throw new Error("API Key inválida.");
+      throw new Error(msg);
+    }
+    const data = await res.json();
+    const raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const clean = raw.replace(/```json[\s\S]*?```/g, m => m.slice(7, -3)).replace(/```/g, "").trim();
+    const match = clean.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error("La IA no devolvió JSON válido.");
+    return JSON.parse(match[0]);
+  }
+}
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
   const res = await fetch(url, {
     method: "POST",
