@@ -21,7 +21,7 @@ const COLORS = [
 
 const SENT_COLORS = { POSITIVO: "#5af0c8", NEGATIVO: "#f05a5a", NEUTRO: "#888", MIXTO: "#f0c85a" };
 const SENT_OPTS = ["POSITIVO", "NEGATIVO", "NEUTRO", "MIXTO"];
-const BATCH_SIZE = 50;
+const BATCH_SIZE = 30;
 const GEMINI_MODEL = "gemini-2.0-flash";
 
 // ─── Gemini API helper ────────────────────────────────────────────────────────
@@ -184,7 +184,7 @@ Responde ÚNICAMENTE con este JSON (sin texto adicional):
         });
         const res = await codeBatch(batches[b], b * BATCH_SIZE, cb);
         allCoded.push(...res);
-        if (b < batches.length - 1) await new Promise(r => setTimeout(r, 5000));
+        if (b < batches.length - 1) await new Promise(r => setTimeout(r, 15000));
       }
 
       setCoded(allCoded);
